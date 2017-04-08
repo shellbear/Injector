@@ -21,6 +21,11 @@ Run the script directly:
 sh injector.sh
 ```
 
+## How it's work ?
+
+Injector will automaticatly detect USB device when connected and will automaticatly select a random file, create a copy of it with the same name and icon but the new file will contains malicious code and allow you to execute any command you cant.
+Caution: When opening malicious file it will open a terminal and quits after 2 seconds which can alert User.
+
 ### Known Issues
 
 If you discover any bugs, feel free to create an issue on GitHub fork and
